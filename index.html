@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Emergency Prep App</title>
+    <!-- Materialize CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+      rel="stylesheet"
+    />
+    <!-- Material Icons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav>
+      <div class="nav-wrapper teal">
+        <a href="#" class="brand-logo center">Emergency Prep</a>
+      </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+      <h5 class="center-align">Your Family’s Emergency Toolkit</h5>
+
+      <!-- Responsive Grid with Cards -->
+      <div class="row">
+        <div class="col s12 m6">
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">Gracie’s Essentials</span>
+              <p>
+                Medicine, comfort items, ID, snacks — everything she needs to
+                feel safe.
+              </p>
+            </div>
+            <div class="card-action">
+              <a href="#">View List</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col s12 m6">
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">Car Kits</span>
+              <p>
+                Split between the Kia and Hyundai — packed with tools, food, and
+                supplies.
+              </p>
+            </div>
+            <div class="card-action">
+              <a href="#">View Inventory</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible Section -->
+      <ul class="collapsible">
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons">check_circle</i>Grab-and-Go Checklist
+          </div>
+          <div class="collapsible-body">
+            <span
+              >Placeholder for checklist items like documents, chargers, water,
+              etc.</span
+            >
+          </div>
+        </li>
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons">info</i>Offline Tips
+          </div>
+          <div class="collapsible-body">
+            <span
+              >Placeholder for advice on what to do when disconnected from the
+              internet.</span
+            >
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var elems = document.querySelectorAll(".collapsible");
+        M.Collapsible.init(elems);
+      });
+    </script>
+  </body>
+</html>

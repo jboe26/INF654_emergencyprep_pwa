@@ -12,6 +12,8 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#b71c1c" />
   </head>
   <body>
     <nav>
@@ -22,6 +24,16 @@
 
     <div class="container">
       <h5 class="center-align">Emergency Prep Toolkit</h5>
+
+      <!-- Placeholder image for visual content -->
+      <div class="center-align">
+        <img
+          src="https://via.placeholder.com/300x150?text=Emergency+Prep+Visual"
+          alt="Emergency Prep Visual"
+          style="margin-bottom: 20px"
+        />
+      </div>
+
       <!-- Gracie's Essentials -->
       <div class="row">
         <div class="col s12 m6">
@@ -58,7 +70,7 @@
                       <li class="collection-item">
                         <label
                           ><input type="checkbox" /><span
-                            >Infant Medicine (ibuprofen/acetaminophen)</span
+                            >Infant Medicine</span
                           ></label
                         >
                       </li>
@@ -67,7 +79,6 @@
                           ><input type="checkbox" /><span>Books</span></label
                         >
                       </li>
-                      <!-- ... other items ... -->
                     </ul>
                   </div>
                 </li>
@@ -92,7 +103,6 @@
                     <i class="material-icons">directions_car</i>Tera's Car
                   </div>
                   <div class="collapsible-body">
-                    <!-- checklist items -->
                     <ul class="collection">
                       <li class="collection-item">
                         <label
@@ -115,7 +125,6 @@
                           ></label
                         >
                       </li>
-                      <!-- ... other items ... -->
                     </ul>
                   </div>
                 </li>
@@ -124,7 +133,6 @@
                     <i class="material-icons">directions_car</i>Josh's Car
                   </div>
                   <div class="collapsible-body">
-                    <!-- checklist items -->
                     <ul class="collection">
                       <li class="collection-item">
                         <label
@@ -140,7 +148,6 @@
                           ></label
                         >
                       </li>
-                      <!-- ... other items ... -->
                     </ul>
                   </div>
                 </li>
@@ -183,6 +190,14 @@
         var elems = document.querySelectorAll(".collapsible");
         M.Collapsible.init(elems);
       });
+
+      // Register service worker
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .then(() => console.log("Service Worker registered"))
+          .catch((err) => console.error("Service Worker error:", err));
+      }
     </script>
   </body>
 </html>

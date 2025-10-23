@@ -16,5 +16,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "description": "A checklist-based emergency prep app for families and caregivers."
 }

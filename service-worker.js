@@ -3,9 +3,13 @@ const urlsToCache = [
   "/",
   "/index.html",
   "/styles.css",
+  "/db.js",
+  "/manifest.json",
+  "/homeicon.png",
   "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css",
-  "https://fonts.googleapis.com/icon?family=Material+Icons",
+  "https://fonts.googleapis.com/icon?family=Material+Icons"
 ];
+
 
 // Install event: cache core assets
 self.addEventListener("install", (event) => {

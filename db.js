@@ -1,19 +1,19 @@
 console.log("db.js is executing");
 
-let db;
+let localDB;
 
 const request = indexedDB.open("emergencyPrepDB", 1);
 
 request.onupgradeneeded = function (event) {
-  db = event.target.result;
-  if (!db.objectStoreNames.contains("tasks")) {
-    db.createObjectStore("tasks", { keyPath: "id" });
+  localDB = event.target.result;
+  if (!localDB.objectStoreNames.contains("tasks")) {
+    localDB.createObjectStore("tasks", { keyPath: "id" });
     console.log("Object store 'tasks' created");
   }  
 };
 
 request.onsuccess = function (event) {
-  db = event.target.result;
+  localDB = event.target.result;
   console.log("IndexedDB opened successfully");
 };
 
@@ -22,20 +22,20 @@ request.onerror = function (event) {
 };
 
 function saveChecklistItem(id, checked) {
-  const tx = db.transaction("checklist", "readwrite");
+  const tx = localDB.transaction("checklist", "readwrite");
   const store = tx.objectStore("checklist");
   store.put({ id, checked });
 }
 
 function saveTask(task) {
-  const tx = db.transaction("tasks", "readwrite");
+  const tx = localDB.transaction("tasks", "readwrite");
   const store = tx.objectStore("tasks");
   store.put(task);
 }
 
 function getUnsyncedTasks() {
   return new Promise((resolve) => {
-    const tx = db.transaction("tasks", "readonly");
+    const tx = localDB.transaction("tasks", "readonly");
     const store = tx.objectStore("tasks");
     const request = store.getAll();
     request.onsuccess = () => {
@@ -46,9 +46,7 @@ function getUnsyncedTasks() {
 }
 
 function deleteTaskById(id) {
-  const tx = db.transaction("tasks", "readwrite");
+  const tx = localDB.transaction("tasks", "readwrite");
   const store = tx.objectStore("tasks");
   store.delete(id);
 }
-
-  

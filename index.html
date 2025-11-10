@@ -17,7 +17,23 @@
   </nav>
 
   <div class="container">
-    <h5 class="center-align">Emergency Prep Toolkit</h5>
+    <h5 class="center-align">Emergency Prep Toolkit - TEST</h5>
+    <h1 style="color: limegreen;">THIS IS THE RIGHT FILE</h1>
+
+    <!-- Task Form -->
+    <div class="row">
+      <form id="taskForm" class="col s12">
+        <div class="input-field">
+          <input id="taskTitle" type="text" required />
+          <label for="taskTitle">Task Title</label>
+        </div>
+        <div class="input-field">
+          <textarea id="taskDescription" class="materialize-textarea"></textarea>
+          <label for="taskDescription">Task Description</label>
+        </div>
+        <button class="btn red darken-2" type="submit">Add Task</button>
+      </form>
+    </div>
 
     <div class="center-align">
       <img src="homeicon.png" alt="Emergency Prep Toolkit" />
@@ -102,18 +118,14 @@
 
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      M.Collapsible.init(document.querySelectorAll(".collapsible"));
 
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-          .register("service-worker.js")
-          .then(() => console.log("Service Worker registered"))
-          .catch((err) => console.error("Service Worker error:", err));
-      }
-    });
-  </script>
+  <!-- Firebase SDKs (compat version for browser) -->
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+
+  <!-- Your app scripts -->
+  <script src="firebaseDB.js"></script>
   <script src="db.js"></script>
+  <script src="app.js" defer></script>
 </body>
 </html>

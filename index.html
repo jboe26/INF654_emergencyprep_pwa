@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,6 +10,7 @@
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#b71c1c" />
 </head>
+
 <body>
   <nav>
     <div class="nav-wrapper red darken-2">
@@ -18,11 +20,12 @@
 
   <div class="container">
     <h5 class="center-align">Emergency Prep Toolkit</h5>
-    <h1 style="color: red;">updated 5:11pm</h1>
+    <h1 style="color: red;">updated 8:42am</h1>
 
-    <!-- Task Form -->
     <div class="row">
       <form id="taskForm" class="col s12">
+        <input type="hidden" id="taskId" value="" />
+
         <div class="input-field">
           <input id="taskTitle" type="text" required />
           <label for="taskTitle">Task Title</label>
@@ -35,12 +38,14 @@
       </form>
     </div>
 
-    <div class="center-align">
-      <img src="homeicon.png" alt="Emergency Prep Toolkit" />
+    <div id="taskListContainer" class="row">
     </div>
 
+    <!-- <div class="center-align">
+      <img src="homeicon.png" alt="Emergency Prep Toolkit" />
+    </div> -->
+
     <div class="row">
-      <!-- Gracie's Essentials -->
       <div class="col s12 m6">
         <div class="card">
           <div class="card-content">
@@ -53,9 +58,11 @@
                 <div class="collapsible-header"><i class="material-icons">child_friendly</i>Show Checklist</div>
                 <div class="collapsible-body">
                   <ul class="collection">
-                    <li class="collection-item"><label><input type="checkbox" /><span>Favorite Blanket</span></label></li>
+                    <li class="collection-item"><label><input type="checkbox" /><span>Favorite Blanket</span></label>
+                    </li>
                     <li class="collection-item"><label><input type="checkbox" /><span>Stuffed Animal</span></label></li>
-                    <li class="collection-item"><label><input type="checkbox" /><span>Infant Medicine</span></label></li>
+                    <li class="collection-item"><label><input type="checkbox" /><span>Infant Medicine</span></label>
+                    </li>
                     <li class="collection-item"><label><input type="checkbox" /><span>Books</span></label></li>
                   </ul>
                 </div>
@@ -65,7 +72,6 @@
         </div>
       </div>
 
-      <!-- Car Kits -->
       <div class="col s12 m6">
         <div class="card">
           <div class="card-content">
@@ -79,8 +85,10 @@
                 <div class="collapsible-body">
                   <ul class="collection">
                     <li class="collection-item"><label><input type="checkbox" /><span>Diaper bag</span></label></li>
-                    <li class="collection-item"><label><input type="checkbox" /><span>Gracie’s Essentials</span></label></li>
-                    <li class="collection-item"><label><input type="checkbox" /><span>Regular stroller</span></label></li>
+                    <li class="collection-item"><label><input type="checkbox" /><span>Gracie’s Essentials</span></label>
+                    </li>
+                    <li class="collection-item"><label><input type="checkbox" /><span>Regular stroller</span></label>
+                    </li>
                   </ul>
                 </div>
               </li>
@@ -88,8 +96,10 @@
                 <div class="collapsible-header"><i class="material-icons">directions_car</i>Josh's Car</div>
                 <div class="collapsible-body">
                   <ul class="collection">
-                    <li class="collection-item"><label><input type="checkbox" /><span>Laptop + charger</span></label></li>
-                    <li class="collection-item"><label><input type="checkbox" /><span>External hard drive</span></label></li>
+                    <li class="collection-item"><label><input type="checkbox" /><span>Laptop + charger</span></label>
+                    </li>
+                    <li class="collection-item"><label><input type="checkbox" /><span>External hard drive</span></label>
+                    </li>
                   </ul>
                 </div>
               </li>
@@ -99,7 +109,6 @@
       </div>
     </div>
 
-    <!-- Extra Collapsibles -->
     <ul class="collapsible">
       <li>
         <div class="collapsible-header"><i class="material-icons">check_circle</i>Grab-and-Go Checklist</div>
@@ -116,16 +125,384 @@
     </ul>
   </div>
 
-  <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-
-  <!-- Firebase SDKs (compat version for browser) -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
 
-  <!-- Your app scripts -->
-  <script src="firebaseDB.js"></script>
-  <script src="db.js"></script>
-  <script src="app.js" defer></script>
+  <script>
+
+    // =========================================================
+    // CODE FROM firebaseDB.js START
+    // =========================================================
+
+    const firebaseConfig = {
+      // NOTE: Replace with YOUR OWN Firebase Config
+      apiKey: "AIzaSyDC6JoO8EBCGEwJqpFBIsnXKhhxikcopUQ",
+      authDomain: "taskmanagerpwa-2cb19.firebaseapp.com",
+      projectId: "taskmanagerpwa-2cb19",
+      storageBucket: "taskmanagerpwa-2cb19.firebasestorage.app",
+      messagingSenderId: "87980517677",
+      appId: "1:87980517677:web:38fa3ac380ea95bdf40ba4",
+      measurementId: "G-RKWWN1E0VK"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const tasksCollection = db.collection("tasks");
+
+    window.addTask = async function (taskData) {
+      const docRef = await tasksCollection.add(taskData);
+      return docRef.id;
+    };
+
+    window.getTasks = async function () {
+      const snapshot = await tasksCollection.get();
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    };
+
+    window.deleteTask = async function (id) {
+      await tasksCollection.doc(id).delete();
+    };
+
+    window.updateTask = async function (id, updatedData) {
+      await tasksCollection.doc(id).update(updatedData);
+    };
+
+    // =========================================================
+    // CODE FROM firebaseDB.js END
+    // =========================================================
+
+
+    // =========================================================
+    // CODE FROM db.js START
+    // =========================================================
+
+    console.log("db.js is executing (Inline)");
+
+    let localDB;
+
+    const request = indexedDB.open("emergencyPrepDB", 1);
+
+    request.onupgradeneeded = function (event) {
+      localDB = event.target.result;
+      if (!localDB.objectStoreNames.contains("tasks")) {
+        localDB.createObjectStore("tasks", { keyPath: "id" });
+        console.log("Object store 'tasks' created");
+      }
+    };
+
+    request.onsuccess = function (event) {
+      localDB = event.target.result;
+      console.log("IndexedDB opened successfully (Inline)");
+
+      // *** Initial load and sync check when DB is ready ***
+      loadTasks();
+      if (navigator.onLine) {
+        syncTasks();
+      }
+    };
+
+    request.onerror = function (event) {
+      console.error("IndexedDB error:", event.target.errorCode);
+    };
+
+    window.getTaskById = function (id) {
+      return new Promise((resolve) => {
+        const tx = localDB.transaction("tasks", "readonly");
+        const store = tx.objectStore("tasks");
+        const request = store.get(id);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = (e) => {
+          console.error("Error fetching single task:", e);
+          resolve(null);
+        };
+      });
+    };
+
+    window.saveTask = function (task) {
+      const tx = localDB.transaction("tasks", "readwrite");
+      const store = tx.objectStore("tasks");
+      const req = store.put(task);
+      req.onsuccess = () => console.log("Task saved locally:", task.id);
+      req.onerror = (e) => console.error("Error saving task:", e);
+    };
+
+    window.getUnsyncedTasks = function () {
+      return new Promise((resolve) => {
+        const tx = localDB.transaction("tasks", "readonly");
+        const store = tx.objectStore("tasks");
+        const request = store.getAll();
+        request.onsuccess = () => {
+          const unsynced = request.result.filter(task => task.synced === false);
+          resolve(unsynced);
+        };
+        request.onerror = (e) => {
+          console.error("Error fetching unsynced tasks:", e);
+          resolve([]);
+        };
+      });
+    };
+
+    window.deleteTaskById = function (id) {
+      const tx = localDB.transaction("tasks", "readwrite");
+      const store = tx.objectStore("tasks");
+      const req = store.delete(id);
+      req.onsuccess = () => console.log("Task deleted locally:", id);
+      req.onerror = (e) => console.error("Error deleting task:", e);
+    };
+
+    // =========================================================
+    // CODE FROM db.js END
+    // =========================================================
+
+
+    // =========================================================
+    // CODE FROM app.js START
+    // =========================================================
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initialize Materialize components
+      M.Collapsible.init(document.querySelectorAll(".collapsible"));
+      M.updateTextFields(); // Critical for labels to work
+
+      // Register service worker
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .then(() => console.log("Service Worker registered"))
+          .catch((err) => console.error("Service Worker error:", err));
+      }
+
+      // --- Task Form and UI Elements ---
+      const form = document.getElementById("taskForm");
+      const titleInput = document.getElementById("taskTitle");
+      const descInput = document.getElementById("taskDescription");
+      const taskIdInput = document.getElementById("taskId");
+      const formActionButton = form.querySelector("button[type='submit']");
+
+      // --- Form Submission Handler (Handles ADD and EDIT) ---
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const title = titleInput.value.trim();
+        const description = descInput.value.trim();
+        const id = taskIdInput.value.trim();
+
+        if (!title) return;
+
+        const taskData = { title, description, status: "pending" };
+
+        if (id) {
+          // FIX: Call the globally defined function
+          await window.handleEdit(id, taskData);
+        } else {
+          // FIX: Call the globally defined function
+          await window.handleAdd(taskData);
+        }
+
+        form.reset();
+        taskIdInput.value = '';
+        formActionButton.textContent = "Add Task";
+        M.updateTextFields();
+        loadTasks();
+      });
+    });
+
+    // FIX: Changed definition to be global (window.handleAdd)
+    window.handleAdd = async function (taskData) {
+      if (navigator.onLine) {
+        const firebaseId = await addTask(taskData);
+        saveTask({ ...taskData, id: firebaseId, synced: true });
+      } else {
+        const tempId = "temp-" + Date.now();
+        saveTask({ ...taskData, id: tempId, synced: false });
+      }
+    }
+
+    // FIX: Changed definition to be global (window.handleEdit)
+    window.handleEdit = async function (id, taskData) {
+      const updatedData = { ...taskData };
+
+      if (navigator.onLine) {
+        await updateTask(id, updatedData);
+        saveTask({ ...updatedData, id, synced: true });
+      } else {
+        saveTask({ ...updatedData, id, synced: false });
+      }
+    }
+
+    window.handleDelete = async function (id) {
+      if (!confirm("Are you sure you want to delete this task?")) return;
+
+      if (navigator.onLine) {
+        try {
+          await deleteTask(id);
+        } catch (error) {
+          console.error("Error deleting from Firebase.", error);
+        }
+        deleteTaskById(id);
+
+      } else {
+        if (id.startsWith("temp-")) {
+          deleteTaskById(id);
+        } else {
+          const task = await getTaskById(id);
+          if (task) {
+            saveTask({ ...task, toDelete: true, synced: false });
+          }
+        }
+      }
+      loadTasks();
+    }
+
+
+    window.syncTasks = async function () {
+      console.log("Attempting to sync tasks...");
+      const unsyncedTasks = await getUnsyncedTasks();
+
+      if (unsyncedTasks.length === 0) {
+        console.log("No unsynced tasks found.");
+        return;
+      }
+
+      for (const task of unsyncedTasks) {
+        const { id, synced, toDelete, ...taskToSync } = task;
+
+        if (toDelete) {
+          try {
+            await deleteTask(id);
+            deleteTaskById(id);
+            console.log(`Synced deletion for task ${id}`);
+          } catch (error) {
+            console.error(`Failed to sync deletion for task ${id}`, error);
+          }
+        } else if (id.startsWith("temp-")) {
+          try {
+            const firebaseId = await addTask(taskToSync);
+            deleteTaskById(id);
+            saveTask({ ...taskToSync, id: firebaseId, synced: true });
+            console.log(`Synced new task. New ID: ${firebaseId}`);
+          } catch (error) {
+            console.error(`Failed to sync new task ${id}`, error);
+          }
+        } else {
+          try {
+            await updateTask(id, taskToSync);
+            saveTask({ ...task, synced: true });
+            console.log(`Synced update for task ${id}`);
+          } catch (error) {
+            console.error(`Failed to sync update for task ${id}`, error);
+          }
+        }
+      }
+      loadTasks();
+    };
+
+
+    window.loadTasks = async function () {
+      const taskContainer = document.getElementById("taskListContainer");
+      if (!taskContainer) return;
+
+      taskContainer.innerHTML = '';
+
+      let tasks = [];
+
+      const localTasks = await new Promise((resolve) => {
+        const tx = localDB.transaction("tasks", "readonly");
+        const store = tx.objectStore("tasks");
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result);
+      });
+
+      if (navigator.onLine) {
+        const firebaseTasks = await getTasks();
+
+        const firebaseMap = new Map(firebaseTasks.map(t => [t.id, t]));
+        localTasks.forEach(t => {
+          if (t.synced === false) {
+            firebaseMap.set(t.id, t);
+          }
+        });
+        tasks = Array.from(firebaseMap.values()).filter(t => !t.toDelete);
+
+      } else {
+        tasks = localTasks.filter(t => !t.toDelete);
+      }
+
+      if (tasks.length === 0) {
+        taskContainer.innerHTML = '<p class="center-align">No tasks added yet!</p>';
+        return;
+      }
+
+      tasks.sort((a, b) => (a.synced === false ? -1 : 1));
+
+      const ul = document.createElement('ul');
+      ul.className = 'collection with-header';
+
+      tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.className = 'collection-item';
+
+        let statusText = '';
+        if (task.synced === false && task.id.startsWith("temp-")) {
+          statusText = '<span class="new badge red" data-badge-caption="offline add"></span>';
+        } else if (task.synced === false) {
+          statusText = '<span class="new badge orange" data-badge-caption="pending sync"></span>';
+        }
+
+        const sanitizedTitle = task.title.replace(/'/g, "\\'");
+        const sanitizedDescription = (task.description || '').replace(/'/g, "\\'");
+
+
+        li.innerHTML = `
+                <div>
+                    <strong>${task.title}</strong>
+                    ${statusText}
+                    <p>${task.description || 'No description.'}</p>
+                    <a href="#!" class="secondary-content" onclick="handleDelete('${task.id}')">
+                        <i class="material-icons red-text">delete</i>
+                    </a>
+                    <a href="#!" class="secondary-content" style="margin-right: 30px;" onclick="openEditForm('${task.id}', '${sanitizedTitle}', '${sanitizedDescription}')">
+                        <i class="material-icons blue-text">edit</i>
+                    </a>
+                </div>
+            `;
+        ul.appendChild(li);
+      });
+      taskContainer.appendChild(ul);
+    }
+
+    window.openEditForm = function (id, title, description) {
+      const titleInput = document.getElementById("taskTitle");
+      const descInput = document.getElementById("taskDescription");
+      const taskIdInput = document.getElementById("taskId");
+      const formActionButton = document.querySelector("#taskForm button[type='submit']");
+
+      titleInput.value = title;
+      descInput.value = description;
+      taskIdInput.value = id;
+
+      formActionButton.textContent = "Edit Task";
+
+      M.updateTextFields();
+
+      document.getElementById("taskForm").scrollIntoView({ behavior: 'smooth' });
+    };
+
+
+    window.addEventListener("online", () => {
+      console.log("Back online — syncing tasks...");
+      syncTasks();
+    });
+
+    // =========================================================
+    // CODE FROM app.js END
+    // =========================================================
+  </script>
 </body>
+
 </html>

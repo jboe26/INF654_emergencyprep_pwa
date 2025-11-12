@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - Emergency Prep App</title>
+  <!-- Materialize CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <!-- Google Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f5f5f5;
+      text-align: center;
+    }
+    .offline-icon {
+      font-size: 80px;
+      color: #b71c1c;
+    }
+    .offline-message {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <i class="material-icons offline-icon">cloud_off</i>
+  <h4>You're Offline</h4>
+  <p class="offline-message">
+    Don’t worry — your tasks are saved locally.<br>
+    They’ll sync automatically once you reconnect.
+  </p>
+  <a href="/index.html" class="btn red darken-2">
+    <i class="material-icons left">home</i>Return to App
+  </a>
+</body>
+</html>

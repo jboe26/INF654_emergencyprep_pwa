@@ -1,8 +1,11 @@
 {
   "name": "Emergency Prep App",
   "short_name": "PrepApp",
-  "start_url": "index.html",
+  "id": "emergency-prep-app",
+  "start_url": "/index.html",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#b71c1c",
   "icons": [
@@ -17,5 +20,9 @@
       "type": "image/png"
     }
   ],
-  "description": "A checklist-based emergency prep app for families and caregivers."
+  "description": "A checklist-based emergency prep app for families and caregivers.",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["productivity", "utilities", "health"],
+  "prefer_related_applications": false
 }

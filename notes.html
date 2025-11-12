@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Quick Notes</title>
+
+  <!-- Materialize CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet" />
+
+  <!-- Firebase SDKs (compat versions for browser use) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+  <!-- Firebase config + initialization -->
+  <script src="firebaseDB.js"></script>
+
+  <!-- IndexedDB logic -->
+  <script src="db.js"></script>
+</head>
+
+<body>
+  <nav>
+    <div class="nav-wrapper red darken-2">
+      <a href="index.html" class="brand-logo center">Home</a>
+      <ul class="right">
+        <li><a href="notes.html">Quick Notes</a></li>
+      </ul>
+    </div>
+  </nav>
+
+
+  <div class="container" style="margin-top:2rem;">
+    <h5>Write a Note</h5>
+    <div class="input-field">
+      <textarea id="noteInput" class="materialize-textarea" placeholder="Your note..."></textarea>
+    </div>
+    <button class="btn red darken-2" onclick="saveNote()">SAVE NOTE</button>
+
+    <h5 style="margin-top:2rem;">Saved Notes</h5>
+    <ul id="notesList" class="collection"></ul>
+  </div>
+
+  <!-- Materialize JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+  <!-- Notes logic -->
+  <script src="notes.js"></script>
+</body>
+
+</html>

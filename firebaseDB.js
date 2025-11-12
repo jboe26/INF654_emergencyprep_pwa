@@ -1,6 +1,8 @@
 // firebaseDB.js
 
-// Firebase configuration
+// ----------------------------------------------------
+// Firebase Initialization
+// ----------------------------------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyDC6JoO8EBCGEwJqpFBIsnXKhhxikcopUQ", 
   authDomain: "taskmanagerpwa-2cb19.firebaseapp.com",
@@ -11,16 +13,19 @@ const firebaseConfig = {
   measurementId: "G-RKWWN1E0VK"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const tasksCollection = db.collection("tasks"); // Reference to the 'tasks' collection
+window.db = firebase.firestore(); // safe global reference
+
 
 // ----------------------------------------------------
-// CRUD functions for Firebase
+// Task Collection Reference
 // ----------------------------------------------------
+const tasksCollection = db.collection("tasks");
 
-window.addTask = async function(taskData) {
+// ----------------------------------------------------
+// Task CRUD Operations
+// ----------------------------------------------------
+window.addTask = async (taskData) => {
   try {
     const docRef = await tasksCollection.add(taskData);
     console.log("Task added to Firebase:", docRef.id);
@@ -30,29 +35,17 @@ window.addTask = async function(taskData) {
   }
 };
 
-window.getTasks = async function() {
+window.getTasks = async () => {
   try {
     const snapshot = await tasksCollection.get();
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error("Error fetching tasks from Firebase:", error);
     return [];
   }
 };
 
-window.deleteTask = async function(id) {
-  try {
-    await tasksCollection.doc(id).delete();
-    console.log("Task deleted from Firebase:", id);
-  } catch (error) {
-    console.error("Error deleting task from Firebase:", error);
-  }
-};
-
-window.updateTask = async function(id, updatedData) {
+window.updateTask = async (id, updatedData) => {
   try {
     await tasksCollection.doc(id).update(updatedData);
     console.log("Task updated in Firebase:", id);
@@ -61,11 +54,19 @@ window.updateTask = async function(id, updatedData) {
   }
 };
 
-// ----------------------------------------------------
-// Sync logic between IndexedDB and Firebase
-// ----------------------------------------------------
+window.deleteTask = async (id) => {
+  try {
+    await tasksCollection.doc(id).delete();
+    console.log("Task deleted from Firebase:", id);
+  } catch (error) {
+    console.error("Error deleting task from Firebase:", error);
+  }
+};
 
-window.syncTasks = async function() {
+// ----------------------------------------------------
+// Sync Unsynced Tasks from IndexedDB to Firebase
+// ----------------------------------------------------
+window.syncTasks = async () => {
   if (typeof getUnsyncedTasks !== "function") {
     console.error("getUnsyncedTasks not available from db.js");
     return;
@@ -74,10 +75,10 @@ window.syncTasks = async function() {
   const unsynced = await getUnsyncedTasks();
   for (const task of unsynced) {
     try {
-      await tasksCollection.doc(task.id).set(task);
+      await tasksCollection.doc(task.id.toString()).set(task);
       task.synced = true;
       if (typeof saveTask === "function") {
-        saveTask(task); // update local copy in IndexedDB
+        saveTask(task); // update local copy
       }
       console.log("Task synced to Firebase:", task.id);
     } catch (error) {
@@ -87,7 +88,7 @@ window.syncTasks = async function() {
 };
 
 // ----------------------------------------------------
-// Online event listener to trigger sync
+// Online Sync Trigger
 // ----------------------------------------------------
 window.addEventListener("online", () => {
   console.log("Back online, syncing tasks...");
@@ -95,17 +96,16 @@ window.addEventListener("online", () => {
 });
 
 // ----------------------------------------------------
-// Optional: Real-time listener for live updates
+// Real-Time Listener (Optional)
 // ----------------------------------------------------
 tasksCollection.onSnapshot((snapshot) => {
   snapshot.docChanges().forEach((change) => {
+    const data = change.doc.data();
     if (change.type === "added") {
-      console.log("New task from Firebase:", change.doc.data());
-    }
-    if (change.type === "modified") {
-      console.log("Task updated in Firebase:", change.doc.data());
-    }
-    if (change.type === "removed") {
+      console.log("New task from Firebase:", data);
+    } else if (change.type === "modified") {
+      console.log("Task updated in Firebase:", data);
+    } else if (change.type === "removed") {
       console.log("Task deleted in Firebase:", change.doc.id);
     }
   });

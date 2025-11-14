@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -45,6 +46,12 @@
         <div class="input-field">
           <textarea id="taskDescription" class="materialize-textarea"></textarea>
           <label for="taskDescription">Task Description</label>
+        </div>
+        <div class="input-field">
+          <select id="folderSelector" required>
+            <option value="" disabled selected>Select Folder</option>
+          </select>
+          <label>Choose Folder</label>
         </div>
         <button class="btn red darken-2 waves-effect waves-light" type="submit">
           <i class="material-icons left">add</i>Add Task
@@ -181,4 +188,5 @@
     });
   </script>
 </body>
+
 </html>

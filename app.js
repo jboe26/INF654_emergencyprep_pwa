@@ -19,6 +19,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const descInput = document.getElementById("taskDescription");
   const taskIdInput = document.getElementById("taskId"); // Hidden input for editing
   const formActionButton = form.querySelector("button[type='submit']");
+  const folderSelector = document.getElementById("folderSelector");
+
+  // Populate folder selector
+  const folders = JSON.parse(localStorage.getItem("folders")) || [];
+  folders.forEach(folder => {
+    const option = document.createElement("option");
+    option.value = folder.id;
+    option.textContent = folder.name;
+    folderSelector.appendChild(option);
+  });
+  M.FormSelect.init(folderSelector);
 
   // --- Form Submission Handler (Add/Edit) ---
   form.addEventListener("submit", async (e) => {
@@ -27,8 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const title = titleInput.value.trim();
     const description = descInput.value.trim();
     const id = taskIdInput.value.trim();
+    const folderId = folderSelector.value;
 
-    if (!title) return;
+    if (!title || !folderId) {
+      M.toast({ html: "Please enter a title and select a folder", classes: "red darken-2" });
+      return;
+    }
 
     const taskData = { title, description, status: "pending" };
 
@@ -36,13 +51,15 @@ document.addEventListener("DOMContentLoaded", () => {
       await handleEdit(id, taskData);
     } else {
       await handleAdd(taskData);
+      addTaskToFolder(folderId, `${title}: ${description}`);
     }
 
     form.reset();
     taskIdInput.value = "";
     formActionButton.textContent = "Add Task";
     M.updateTextFields();
-    loadTasks(); // Refresh UI
+    loadTasks();
+    reloadFolders();
   });
 });
 
@@ -52,11 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function handleAdd(taskData) {
   if (navigator.onLine) {
-    // Online: Add to Firebase, then save locally
     const firebaseId = await addTask(taskData);
     saveTask({ ...taskData, id: firebaseId, synced: true });
   } else {
-    // Offline: Save with temp ID
     const tempId = "temp-" + Date.now();
     saveTask({ ...taskData, id: tempId, synced: false });
   }
@@ -95,7 +110,27 @@ window.handleDelete = async function (id) {
 };
 
 // ----------------------------------------------------
-// Sync Logic (Week 9 Core)
+// Folder Helpers
+// ----------------------------------------------------
+
+function addTaskToFolder(folderId, itemText) {
+  let folders = JSON.parse(localStorage.getItem("folders")) || [];
+  const idx = folders.findIndex(f => f.id == folderId);
+  if (idx !== -1) {
+    folders[idx].items.push(itemText);
+    localStorage.setItem("folders", JSON.stringify(folders));
+  }
+}
+
+function reloadFolders() {
+  const collapsibleList = document.querySelector(".collapsible");
+  collapsibleList.innerHTML = "";
+  const folders = JSON.parse(localStorage.getItem("folders")) || [];
+  folders.forEach(folder => renderFolder(folder.id, folder.name, folder.items, collapsibleList));
+}
+
+// ----------------------------------------------------
+// Sync Logic
 // ----------------------------------------------------
 
 window.syncTasks = async function () {
@@ -143,7 +178,6 @@ window.loadTasks = async function () {
 
   taskContainer.innerHTML = "";
 
-  // Fetch local tasks
   const localTasks = await new Promise((resolve) => {
     const tx = localDB.transaction("tasks", "readonly");
     const store = tx.objectStore("tasks");
@@ -226,13 +260,14 @@ window.openEditForm = function (id, title, description) {
   formActionButton.textContent = "Edit Task";
   M.updateTextFields();
   document.getElementById("taskForm").scrollIntoView({ behavior: "smooth" });
-};
+
+}
 
 // ----------------------------------------------------
 // Dynamic Checklist Section Generator
 // ----------------------------------------------------
 
-window.appendChecklistSection = function(title, icon, items) {
+window.appendChecklistSection = function (title, icon, items) {
   const collapsibleList = document.querySelector(".collapsible"); // Assumes one main collapsible
 
   const li = document.createElement("li");

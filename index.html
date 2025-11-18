@@ -43,16 +43,6 @@
           <input id="taskTitle" type="text" required />
           <label for="taskTitle">Task Title</label>
         </div>
-        <div class="input-field">
-          <textarea id="taskDescription" class="materialize-textarea"></textarea>
-          <label for="taskDescription">Task Description</label>
-        </div>
-        <div class="input-field">
-          <select id="folderSelector" required>
-            <option value="" disabled selected>Select Folder</option>
-          </select>
-          <label>Choose Folder</label>
-        </div>
         <button class="btn red darken-2 waves-effect waves-light" type="submit">
           <i class="material-icons left">add</i>Add Task
         </button>
@@ -67,12 +57,6 @@
       <!-- [Your collapsible checklist sections go here — unchanged] -->
     </ul>
 
-    <!-- Add Folder Button -->
-    <div class="center-align" style="margin-top: 2rem;">
-      <button class="btn red darken-2" onclick="createNewFolder()">
-        <i class="material-icons left">create_new_folder</i>Create Another Folder
-      </button>
-    </div>
   </div>
 
   <!-- Scripts -->
@@ -92,10 +76,12 @@
       const logoutBtn = document.getElementById("logoutBtn");
 
       if (user) {
-        status.innerHTML = `Welcome, <strong>${user.name}</strong>`;
+        const name = user.displayName || user.email;
+        status.innerHTML = `Welcome, <strong>${name}</strong>`;
         notesBtn.style.display = "inline-block";
         logoutBtn.style.display = "inline-block";
-      } else {
+      }
+      else {
         status.innerHTML = `<a href="auth.html" class="btn red darken-2">Sign In</a>`;
         notesBtn.style.display = "none";
         logoutBtn.style.display = "none";
@@ -105,86 +91,6 @@
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await firebase.auth().signOut();
       M.toast({ html: "Logged out!", classes: "blue darken-2" });
-    });
-  </script>
-
-  <!-- Folder Logic -->
-  <script>
-    function createNewFolder() {
-      const collapsibleList = document.querySelector(".collapsible");
-      const folderName = "New Folder";
-      const id = Date.now();
-      let folders = JSON.parse(localStorage.getItem("folders")) || [];
-      folders.push({ id, name: folderName, items: ["Example item"] });
-      localStorage.setItem("folders", JSON.stringify(folders));
-      renderFolder(id, folderName, ["Example item"], collapsibleList);
-    }
-
-    function renderFolder(id, name, items, collapsibleList) {
-      const li = document.createElement("li");
-      const header = document.createElement("div");
-      header.className = "collapsible-header";
-      const icon = document.createElement("i");
-      icon.className = "material-icons";
-      icon.textContent = "folder";
-      const editableTitle = document.createElement("span");
-      editableTitle.textContent = name;
-      editableTitle.contentEditable = true;
-      editableTitle.style.outline = "none";
-      editableTitle.style.marginLeft = "10px";
-      editableTitle.style.cursor = "text";
-      editableTitle.addEventListener("blur", () => {
-        let folders = JSON.parse(localStorage.getItem("folders")) || [];
-        const idx = folders.findIndex(f => f.id === id);
-        if (idx !== -1) {
-          folders[idx].name = editableTitle.textContent.trim() || "New Folder";
-          localStorage.setItem("folders", JSON.stringify(folders));
-        }
-      });
-      header.appendChild(icon);
-      header.appendChild(editableTitle);
-
-      const body = document.createElement("div");
-      body.className = "collapsible-body";
-      const ul = document.createElement("ul");
-      ul.className = "collection";
-
-      items.forEach((item, itemIdx) => {
-        const liItem = document.createElement("li");
-        liItem.className = "collection-item";
-        const label = document.createElement("label");
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        const editableItem = document.createElement("span");
-        editableItem.textContent = item;
-        editableItem.contentEditable = true;
-        editableItem.style.outline = "none";
-        editableItem.style.cursor = "text";
-        editableItem.addEventListener("blur", () => {
-          let folders = JSON.parse(localStorage.getItem("folders")) || [];
-          const idx = folders.findIndex(f => f.id === id);
-          if (idx !== -1) {
-            folders[idx].items[itemIdx] = editableItem.textContent.trim() || "New Item";
-            localStorage.setItem("folders", JSON.stringify(folders));
-          }
-        });
-        label.appendChild(checkbox);
-        label.appendChild(editableItem);
-        liItem.appendChild(label);
-        ul.appendChild(liItem);
-      });
-
-      body.appendChild(ul);
-      li.appendChild(header);
-      li.appendChild(body);
-      collapsibleList.appendChild(li);
-      M.Collapsible.init(collapsibleList);
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const collapsibleList = document.querySelector(".collapsible");
-      const folders = JSON.parse(localStorage.getItem("folders")) || [];
-      folders.forEach(folder => renderFolder(folder.id, folder.name, folder.items, collapsibleList));
     });
   </script>
 </body>

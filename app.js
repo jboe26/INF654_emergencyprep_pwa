@@ -1,8 +1,7 @@
-// app.js
-
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize Materialize components
-  M.Collapsible.init(document.querySelectorAll(".collapsible"));
+  const collapsibles = document.querySelectorAll(".collapsible");
+  M.Collapsible.init(collapsibles);
   M.updateTextFields();
 
   // Register service worker
@@ -19,17 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const descInput = document.getElementById("taskDescription");
   const taskIdInput = document.getElementById("taskId"); // Hidden input for editing
   const formActionButton = form.querySelector("button[type='submit']");
-  const folderSelector = document.getElementById("folderSelector");
-
-  // Populate folder selector
-  const folders = JSON.parse(localStorage.getItem("folders")) || [];
-  folders.forEach(folder => {
-    const option = document.createElement("option");
-    option.value = folder.id;
-    option.textContent = folder.name;
-    folderSelector.appendChild(option);
-  });
-  M.FormSelect.init(folderSelector);
 
   // --- Form Submission Handler (Add/Edit) ---
   form.addEventListener("submit", async (e) => {
@@ -38,10 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const title = titleInput.value.trim();
     const description = descInput.value.trim();
     const id = taskIdInput.value.trim();
-    const folderId = folderSelector.value;
 
-    if (!title || !folderId) {
-      M.toast({ html: "Please enter a title and select a folder", classes: "red darken-2" });
+    if (!title) {
+      M.toast({ html: "Please enter a task title", classes: "red darken-2" });
       return;
     }
 
@@ -51,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
       await handleEdit(id, taskData);
     } else {
       await handleAdd(taskData);
-      addTaskToFolder(folderId, `${title}: ${description}`);
     }
 
     form.reset();
@@ -59,7 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
     formActionButton.textContent = "Add Task";
     M.updateTextFields();
     loadTasks();
-    reloadFolders();
   });
 });
 
@@ -68,21 +53,31 @@ document.addEventListener("DOMContentLoaded", () => {
 // ----------------------------------------------------
 
 async function handleAdd(taskData) {
-  if (navigator.onLine) {
-    const firebaseId = await addTask(taskData);
-    saveTask({ ...taskData, id: firebaseId, synced: true });
-  } else {
-    const tempId = "temp-" + Date.now();
-    saveTask({ ...taskData, id: tempId, synced: false });
+  try {
+    if (navigator.onLine) {
+      const firebaseId = await addTask(taskData);
+      saveTask({ ...taskData, id: firebaseId, synced: true });
+    } else {
+      const tempId = "temp-" + Date.now();
+      saveTask({ ...taskData, id: tempId, synced: false });
+    }
+  } catch (err) {
+    console.error("handleAdd error:", err);
+    M.toast({ html: "Failed to add task", classes: "red darken-2" });
   }
 }
 
 async function handleEdit(id, taskData) {
-  if (navigator.onLine) {
-    await updateTask(id, taskData);
-    saveTask({ ...taskData, id, synced: true });
-  } else {
-    saveTask({ ...taskData, id, synced: false });
+  try {
+    if (navigator.onLine) {
+      await updateTask(id, taskData);
+      saveTask({ ...taskData, id, synced: true });
+    } else {
+      saveTask({ ...taskData, id, synced: false });
+    }
+  } catch (err) {
+    console.error("handleEdit error:", err);
+    M.toast({ html: "Failed to edit task", classes: "red darken-2" });
   }
 }
 
@@ -106,28 +101,9 @@ window.handleDelete = async function (id) {
       }
     }
   }
+
   loadTasks();
 };
-
-// ----------------------------------------------------
-// Folder Helpers
-// ----------------------------------------------------
-
-function addTaskToFolder(folderId, itemText) {
-  let folders = JSON.parse(localStorage.getItem("folders")) || [];
-  const idx = folders.findIndex(f => f.id == folderId);
-  if (idx !== -1) {
-    folders[idx].items.push(itemText);
-    localStorage.setItem("folders", JSON.stringify(folders));
-  }
-}
-
-function reloadFolders() {
-  const collapsibleList = document.querySelector(".collapsible");
-  collapsibleList.innerHTML = "";
-  const folders = JSON.parse(localStorage.getItem("folders")) || [];
-  folders.forEach(folder => renderFolder(folder.id, folder.name, folder.items, collapsibleList));
-}
 
 // ----------------------------------------------------
 // Sync Logic
@@ -162,6 +138,7 @@ window.syncTasks = async function () {
       }
     } catch (error) {
       console.error(`Failed to sync task ${id}`, error);
+      M.toast({ html: `Sync failed for task ${id}`, classes: "orange darken-2" });
     }
   }
 
@@ -177,6 +154,11 @@ window.loadTasks = async function () {
   if (!taskContainer) return;
 
   taskContainer.innerHTML = "";
+
+  if (!window.localDB) {
+    setTimeout(() => window.loadTasks(), 200);
+    return;
+  }
 
   const localTasks = await new Promise((resolve) => {
     const tx = localDB.transaction("tasks", "readonly");
@@ -260,43 +242,7 @@ window.openEditForm = function (id, title, description) {
   formActionButton.textContent = "Edit Task";
   M.updateTextFields();
   document.getElementById("taskForm").scrollIntoView({ behavior: "smooth" });
-
-}
-
-// ----------------------------------------------------
-// Dynamic Checklist Section Generator
-// ----------------------------------------------------
-
-window.appendChecklistSection = function (title, icon, items) {
-  const collapsibleList = document.querySelector(".collapsible"); // Assumes one main collapsible
-
-  const li = document.createElement("li");
-
-  const header = document.createElement("div");
-  header.className = "collapsible-header";
-  header.innerHTML = `<i class="material-icons">${icon}</i>${title}`;
-
-  const body = document.createElement("div");
-  body.className = "collapsible-body";
-
-  const ul = document.createElement("ul");
-  ul.className = "collection";
-
-  items.forEach(item => {
-    const liItem = document.createElement("li");
-    liItem.className = "collection-item";
-    liItem.innerHTML = `<label><input type="checkbox" /><span>${item}</span></label>`;
-    ul.appendChild(liItem);
-  });
-
-  body.appendChild(ul);
-  li.appendChild(header);
-  li.appendChild(body);
-  collapsibleList.appendChild(li);
-
-  M.Collapsible.init(collapsibleList);
 };
-
 
 // ----------------------------------------------------
 // Sync Events

@@ -4,7 +4,7 @@
 // Firebase Initialization
 // ----------------------------------------------------
 const firebaseConfig = {
-  apiKey: "AIzaSyDC6JoO8EBCGEwJqpFBIsnXKhhxikcopUQ", 
+  apiKey: "AIzaSyDC6JoO8EBCGEwJqpFBIsnXKhhxikcopUQ",
   authDomain: "taskmanagerpwa-2cb19.firebaseapp.com",
   projectId: "taskmanagerpwa-2cb19",
   storageBucket: "taskmanagerpwa-2cb19.firebasestorage.app",
@@ -16,27 +16,33 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 window.db = firebase.firestore(); // safe global reference
 
+// ----------------------------------------------------
+// Helpers: get user-scoped collection
+// ----------------------------------------------------
+function getUserTasksCollection() {
+  const user = firebase.auth().currentUser;
+  if (!user) throw new Error("No user signed in");
+  return db.collection("users").doc(user.uid).collection("tasks");
+}
 
 // ----------------------------------------------------
-// Task Collection Reference
-// ----------------------------------------------------
-const tasksCollection = db.collection("tasks");
-
-// ----------------------------------------------------
-// Task CRUD Operations
+// Task CRUD Operations (user-scoped)
 // ----------------------------------------------------
 window.addTask = async (taskData) => {
   try {
+    const tasksCollection = getUserTasksCollection();
     const docRef = await tasksCollection.add(taskData);
     console.log("Task added to Firebase:", docRef.id);
     return docRef.id;
   } catch (error) {
     console.error("Error adding task to Firebase:", error);
+    throw error;
   }
 };
 
 window.getTasks = async () => {
   try {
+    const tasksCollection = getUserTasksCollection();
     const snapshot = await tasksCollection.get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
@@ -47,6 +53,7 @@ window.getTasks = async () => {
 
 window.updateTask = async (id, updatedData) => {
   try {
+    const tasksCollection = getUserTasksCollection();
     await tasksCollection.doc(id).update(updatedData);
     console.log("Task updated in Firebase:", id);
   } catch (error) {
@@ -56,6 +63,7 @@ window.updateTask = async (id, updatedData) => {
 
 window.deleteTask = async (id) => {
   try {
+    const tasksCollection = getUserTasksCollection();
     await tasksCollection.doc(id).delete();
     console.log("Task deleted from Firebase:", id);
   } catch (error) {
@@ -64,49 +72,21 @@ window.deleteTask = async (id) => {
 };
 
 // ----------------------------------------------------
-// Sync Unsynced Tasks from IndexedDB to Firebase
-// ----------------------------------------------------
-window.syncTasks = async () => {
-  if (typeof getUnsyncedTasks !== "function") {
-    console.error("getUnsyncedTasks not available from db.js");
-    return;
-  }
-
-  const unsynced = await getUnsyncedTasks();
-  for (const task of unsynced) {
-    try {
-      await tasksCollection.doc(task.id.toString()).set(task);
-      task.synced = true;
-      if (typeof saveTask === "function") {
-        saveTask(task); // update local copy
-      }
-      console.log("Task synced to Firebase:", task.id);
-    } catch (error) {
-      console.error("Error syncing task:", error);
-    }
-  }
-};
-
-// ----------------------------------------------------
-// Online Sync Trigger
-// ----------------------------------------------------
-window.addEventListener("online", () => {
-  console.log("Back online, syncing tasks...");
-  window.syncTasks();
-});
-
-// ----------------------------------------------------
 // Real-Time Listener (Optional)
 // ----------------------------------------------------
-tasksCollection.onSnapshot((snapshot) => {
-  snapshot.docChanges().forEach((change) => {
-    const data = change.doc.data();
-    if (change.type === "added") {
-      console.log("New task from Firebase:", data);
-    } else if (change.type === "modified") {
-      console.log("Task updated in Firebase:", data);
-    } else if (change.type === "removed") {
-      console.log("Task deleted in Firebase:", change.doc.id);
-    }
+firebase.auth().onAuthStateChanged((user) => {
+  if (!user) return;
+  const tasksCollection = getUserTasksCollection();
+  tasksCollection.onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+      const data = change.doc.data();
+      if (change.type === "added") {
+        console.log("New task from Firebase:", data);
+      } else if (change.type === "modified") {
+        console.log("Task updated in Firebase:", data);
+      } else if (change.type === "removed") {
+        console.log("Task deleted in Firebase:", change.doc.id);
+      }
+    });
   });
 });
